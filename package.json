@@ -1,0 +1,23 @@
+{
+  "name": "create-discovery-kit",
+  "version": "0.1.0",
+  "description": "Scaffold a discovery-kit project",
+  "bin": {
+    "create-discovery-kit": "./index.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "scaffold",
+    "template",
+    "discovery",
+    "cli"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": "haya-inc/create-discovery-kit",
+  "author": "haya-inc",
+  "license": "MIT"
+}
