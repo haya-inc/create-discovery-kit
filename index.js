@@ -8,7 +8,7 @@ const { version } = require("./package.json");
 const TEMPLATE_REPO = "haya-inc/discovery-kit-template";
 const TEMPLATE_URL = `https://github.com/${TEMPLATE_REPO}.git`;
 const TEMPLATE_REF = "432afb302ba93bd8623dd457fa5b0585c6a3cfd1";
-const DEFAULT_PROJECT_NAME = "discovery-kit-project";
+const DEFAULT_PROJECT_NAME = "discovery-kit";
 
 function runGit(args, cwd) {
   execFileSync("git", args, {
@@ -96,7 +96,7 @@ function parseArgs(argv) {
   const [targetArg] = args;
 
   if (!targetArg) {
-    return { projectName: DEFAULT_PROJECT_NAME };
+    return { action: "default", projectName: DEFAULT_PROJECT_NAME };
   }
 
   if (targetArg === "-h" || targetArg === "--help") {
@@ -109,7 +109,7 @@ function parseArgs(argv) {
 
   validateProjectName(targetArg);
 
-  return { projectName: targetArg };
+  return { action: "create", projectName: targetArg };
 }
 
 function removeGitkeep(dir) {
@@ -125,34 +125,45 @@ function removeGitkeep(dir) {
 }
 
 function main() {
-  let projectName;
+  let parsedArgs;
 
   try {
-    const parsedArgs = parseArgs(process.argv);
-
-    if (parsedArgs.action === "help") {
-      printHelp();
-      return;
-    }
-
-    if (parsedArgs.action === "version") {
-      console.log(version);
-      return;
-    }
-
-    projectName = parsedArgs.projectName;
+    parsedArgs = parseArgs(process.argv);
   } catch (error) {
     console.error(`Error: ${formatError(error)}`);
     process.exit(1);
   }
 
-  const cwd = process.cwd();
-  const targetDir = path.resolve(cwd, projectName);
-
-  if (fs.existsSync(targetDir)) {
-    console.error(`Error: directory already exists: ${projectName}`);
-    process.exit(1);
+  if (parsedArgs.action === "help") {
+    printHelp();
+    return;
   }
+
+  if (parsedArgs.action === "version") {
+    console.log(version);
+    return;
+  }
+
+  const { projectName } = parsedArgs;
+
+  const cwd = process.cwd();
+  let finalName = projectName;
+  const targetBase = path.resolve(cwd, projectName);
+
+  if (fs.existsSync(targetBase)) {
+    if (parsedArgs.action === "default") {
+      let n = 2;
+      while (fs.existsSync(path.resolve(cwd, `${projectName}-${n}`))) {
+        n++;
+      }
+      finalName = `${projectName}-${n}`;
+    } else {
+      console.error(`Error: directory already exists: ${projectName}`);
+      process.exit(1);
+    }
+  }
+
+  const targetDir = path.resolve(cwd, finalName);
 
   let currentStep = "clone template";
 
@@ -171,7 +182,7 @@ function main() {
   console.log("✔ Discovery kit created");
   console.log("");
   console.log("Next steps:");
-  console.log(`  cd ${quoteForShell(projectName)}`);
+  console.log(`  cd ${quoteForShell(finalName)}`);
   console.log("");
 }
 

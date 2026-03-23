@@ -38,3 +38,8 @@ cd my-project
 
 - リポジトリ: https://github.com/haya-inc/discovery-kit-template
 - 固定 ref: `432afb302ba93bd8623dd457fa5b0585c6a3cfd1`
+
+## リリース
+
+- GitHub Release の tag は `package.json` の version と一致している必要があります。`v` プレフィックスは利用できます。
+- prerelease は npm の `next` dist-tag で公開され、stable release のみ `latest` に公開されます。
